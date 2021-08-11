@@ -14,12 +14,23 @@ class _MyHomePageState extends State<MyHomePage> {
   var locationMessage = "";
   var numberMessage = "";
   late String phoneNumber;
-
-
   final Telephony telephony = Telephony.instance;
   final TextEditingController _phoneController = TextEditingController();
 
   @override
+  void initState(){
+    super.initState();
+    initPlaformState();
+  }
+  Future <void> initPlaformState() async{
+    await [Permission.sms,Permission.locationWhenInUse].request();
+    while(await Permission.sms.isDenied) {
+      Permission.sms.request();
+    }
+    while(await Permission.locationWhenInUse.isDenied) {
+      Permission.locationWhenInUse.request();
+    }
+  }
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -131,6 +142,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+
   void SendSMS() async {
 
     if (locationMessage == "") {
@@ -142,6 +154,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ScaffoldMessenger.of(context).showSnackBar(snackBar2);
       }
       else{
+
         telephony.sendSms(to: _phoneController.text, message: locationMessage);
           //final snackBar = SnackBar(content: Text('Mensaje enviado'));
           //ScaffoldMessenger.of(context).showSnackBar(snackBar);
