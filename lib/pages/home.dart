@@ -1,4 +1,4 @@
-
+import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
@@ -14,7 +14,7 @@ class _MyHomePageState extends State<MyHomePage> {
   var locationMessage = "";
   var numberMessage = "";
   late String phoneNumber;
-  GlobalKey formKey = GlobalKey<FormState>();
+
 
   final Telephony telephony = Telephony.instance;
   final TextEditingController _phoneController = TextEditingController();
@@ -74,7 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Padding(
               padding: EdgeInsets.all(15.0),
               child: Form(
-                key: formKey,
+
                 child: Column(
                   children: <Widget>[
                     TextFormField(
@@ -123,8 +123,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void getCurrentLocation() async {
     var position = await Geolocator()
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    var lastPosition = await Geolocator().getLastKnownPosition();
-    print(lastPosition);
     setState(() {
       locationMessage =
       "Current position: ${position.latitude.toStringAsFixed(7)} , ${position.longitude.toStringAsFixed(7)}";
@@ -134,14 +132,21 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void SendSMS() async {
+
     if (locationMessage == "") {
       final snackBar1 = SnackBar(content: Text('Missing location'));
       ScaffoldMessenger.of(context).showSnackBar(snackBar1);
     } else {
-      telephony.sendSms(to: _phoneController.text, message: locationMessage);
-      //final snackBar = SnackBar(content: Text('Mensaje enviado'));
-      //ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      _showSecondPage(context);
+      if (_phoneController.text == ""){
+        final snackBar2 = SnackBar(content: Text('Missing number'));
+        ScaffoldMessenger.of(context).showSnackBar(snackBar2);
+      }
+      else{
+        telephony.sendSms(to: _phoneController.text, message: locationMessage);
+          //final snackBar = SnackBar(content: Text('Mensaje enviado'));
+          //ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        _showSecondPage(context);
+      }
     }
   }
 
