@@ -1,8 +1,9 @@
+import 'dart:async';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'dart:io';
 import 'package:geolocator/geolocator.dart';
-import 'package:telephony/telephony.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:flutter_application_1/pages/second_page.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -13,23 +14,29 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   var locationMessage = "";
   var numberMessage = "";
-  late String phoneNumber;
-  final Telephony telephony = Telephony.instance;
-  final TextEditingController _phoneController = TextEditingController();
+  final uclient = RawDatagramSocket.bind('181.235.94.157',9000);
+  final client = IO.io('http://181.235.94.157:9000',
+      <String, dynamic>{
+        'transports' : ['websocket'],
+      });
 
   @override
   void initState(){
     super.initState();
     initPlaformState();
+    connectToServer();
   }
   Future <void> initPlaformState() async{
-    await [Permission.sms,Permission.locationWhenInUse].request();
-    while(await Permission.sms.isDenied) {
-      Permission.sms.request();
-    }
+    await Permission.locationWhenInUse.request();
     while(await Permission.locationWhenInUse.isDenied) {
       Permission.locationWhenInUse.request();
     }
+  }
+  void connectToServer(){
+      client.connect();
+      client.on('connect',(_) => print('connect: ${client.id}'));
+
+
   }
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,20 +95,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
                 child: Column(
                   children: <Widget>[
-                    TextFormField(
-                      controller: _phoneController,
-                      keyboardType: TextInputType.phone,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Insert phone number';
-                        }
-                      },
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        //hintText: 'Celular',
-                        labelText: 'Phone Number',
-                      ),
-                    ),
                     RaisedButton(
                         color: Colors.blue,
                         textColor: Colors.white,
@@ -109,7 +102,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             borderRadius: BorderRadius.circular(10)),
                         child: Text("SEND", style: TextStyle(fontSize: 20)),
                         onPressed: () {
-                          SendSMS();
+                          sendLocation();
                         }),
                   ],
                 ),
@@ -132,41 +125,23 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void getCurrentLocation() async {
-    var position = await Geolocator()
+     var position = await Geolocator()
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
     setState(() {
       locationMessage =
       "Current position: ${position.latitude.toStringAsFixed(7)} , ${position.longitude.toStringAsFixed(7)}";
-      numberMessage =
-      "insert the phone number you want to share your location with";
     });
   }
+  void sendLocation() {
+    client.emit('msg',locationMessage);
 
-
-  void SendSMS() async {
-
-    if (locationMessage == "") {
-      final snackBar1 = SnackBar(content: Text('Missing location'));
-      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
-    } else {
-      if (_phoneController.text == ""){
-        final snackBar2 = SnackBar(content: Text('Missing number'));
-        ScaffoldMessenger.of(context).showSnackBar(snackBar2);
-      }
-      else{
-
-        telephony.sendSms(to: _phoneController.text, message: locationMessage);
-          //final snackBar = SnackBar(content: Text('Mensaje enviado'));
-          //ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        _showSecondPage(context);
-      }
-    }
   }
 
+}
   void _showSecondPage(BuildContext context) {
     final route = MaterialPageRoute(builder: (BuildContext context) {
       return SecondPage();
     });
     Navigator.of(context).push(route);
   }
-}
+
