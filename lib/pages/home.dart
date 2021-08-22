@@ -14,8 +14,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   var locationMessage = "";
   var numberMessage = "";
-  final uclient = RawDatagramSocket.bind('181.235.94.157',9000);
-  final client = IO.io('http://181.235.94.157:9000',
+  final client = IO.io('http://181.235.94.157:8000',
       <String, dynamic>{
         'transports' : ['websocket'],
       });
@@ -134,7 +133,12 @@ class _MyHomePageState extends State<MyHomePage> {
   }
   void sendLocation() {
     client.emit('msg',locationMessage);
-
+    RawDatagramSocket.bind(InternetAddress.ANY_IP_V4, 0).then((RawDatagramSocket socket){
+      print('Sending from ${socket.address.address}:${socket.port}');
+      int port = 9000;
+      socket.send(locationMessage.codeUnits,
+          InternetAddress('181.235.94.157'), 9000);
+    });
   }
 
 }
