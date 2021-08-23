@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:geolocator/geolocator.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'package:flutter_application_1/pages/second_page.dart';
 
 class MyHomePage extends StatefulWidget {
   @override
@@ -13,30 +12,33 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var locationMessage = "";
-  var numberMessage = "";
-  final client = IO.io('http://181.235.94.157:8000',
-      <String, dynamic>{
-        'transports' : ['websocket'],
-      });
+  var infoPhone = "";
+  String host1 = "angelica.hopto.org";
+  String host2 = "taxiflow.zapto.org";
+  final snackBar = SnackBar(content: Text('Mensaje enviado'));
+  final snackBar1 = SnackBar(content: Text('Missing location'));
+  final client = IO.io('http://angelica.hopto.org:8000', <String, dynamic>{
+    'transports': ['websocket'],
+  });
+
+  final client2 = IO.io('http://taxiflow.zapto.org:8000', <String, dynamic>{
+    'transports': ['websocket'],
+  });
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     initPlaformState();
     connectToServer();
   }
-  Future <void> initPlaformState() async{
+
+  Future<void> initPlaformState() async {
     await Permission.locationWhenInUse.request();
-    while(await Permission.locationWhenInUse.isDenied) {
+    while (await Permission.locationWhenInUse.isDenied) {
       Permission.locationWhenInUse.request();
     }
   }
-  void connectToServer(){
-      client.connect();
-      client.on('connect',(_) => print('connect: ${client.id}'));
 
-
-  }
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -46,7 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
         leading: Icon(Icons.home),
         actions: [
           IconButton(
-            icon: Icon(Icons.message),
+            icon: Icon(Icons.directions_car),
             onPressed: () {
               // push it back in
             },
@@ -86,12 +88,9 @@ class _MyHomePageState extends State<MyHomePage> {
             SizedBox(
               height: 20,
             ),
-            Text(numberMessage,
-                style: TextStyle(fontSize: 10, color: Colors.grey)),
             Padding(
               padding: EdgeInsets.all(15.0),
               child: Form(
-
                 child: Column(
                   children: <Widget>[
                     RaisedButton(
@@ -102,6 +101,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: Text("SEND", style: TextStyle(fontSize: 20)),
                         onPressed: () {
                           sendLocation();
+                          Text(infoPhone);
                         }),
                   ],
                 ),
@@ -124,28 +124,49 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void getCurrentLocation() async {
-     var position = await Geolocator()
+    var position = await Geolocator()
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
     setState(() {
       locationMessage =
       "Current position: ${position.latitude.toStringAsFixed(7)} , ${position.longitude.toStringAsFixed(7)}";
     });
   }
+
+  void connectToServer() {
+    client.connect();
+    client.on('connect', (_) => print('connect: ${client.id}'));
+    client.on('connect', (_) => print('connect: ${client2.id}'));
+  }
+
   void sendLocation() {
-    client.emit('msg',locationMessage);
-    RawDatagramSocket.bind(InternetAddress.ANY_IP_V4, 0).then((RawDatagramSocket socket){
-      print('Sending from ${socket.address.address}:${socket.port}');
-      int port = 9000;
-      socket.send(locationMessage.codeUnits,
-          InternetAddress('181.235.94.157'), 9000);
-    });
-  }
+    if (locationMessage == "") {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
+    }
+    else {
+      client.emit('msg', locationMessage);
+      client2.emit('msg', locationMessage);
 
+      InternetAddress.lookup(host1).then((value) {
+        value.forEach((element) async {
+          var ip1 = (element.address);
+          RawDatagramSocket.bind(InternetAddress.anyIPv4, 0)
+              .then((RawDatagramSocket socket) {
+            socket.send(locationMessage.codeUnits, InternetAddress(ip1), 9000);
+          });
+        });
+      });
+
+      InternetAddress.lookup(host2).then((value) {
+        value.forEach((element) async {
+          var ip2 = (element.address);
+          RawDatagramSocket.bind(InternetAddress.anyIPv4, 0)
+              .then((RawDatagramSocket socket) {
+            socket.send(locationMessage.codeUnits, InternetAddress(ip2), 9000);
+          });
+        });
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
+  }
 }
-  void _showSecondPage(BuildContext context) {
-    final route = MaterialPageRoute(builder: (BuildContext context) {
-      return SecondPage();
-    });
-    Navigator.of(context).push(route);
-  }
-
