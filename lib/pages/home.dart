@@ -13,23 +13,18 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   var locationMessage = "";
   var infoPhone = "";
+  var timeStamp = "";
   String host1 = "angelica.hopto.org";
   String host2 = "taxiflow.zapto.org";
+  String host3 = "dierickb.hopto.org";
   final snackBar = SnackBar(content: Text('Mensaje enviado'));
   final snackBar1 = SnackBar(content: Text('Missing location'));
-  final client = IO.io('http://angelica.hopto.org:8000', <String, dynamic>{
-    'transports': ['websocket'],
-  });
 
-  final client2 = IO.io('http://taxiflow.zapto.org:8000', <String, dynamic>{
-    'transports': ['websocket'],
-  });
 
   @override
   void initState() {
     super.initState();
     initPlaformState();
-    connectToServer();
   }
 
   Future<void> initPlaformState() async {
@@ -38,7 +33,6 @@ class _MyHomePageState extends State<MyHomePage> {
       Permission.locationWhenInUse.request();
     }
   }
-
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -128,23 +122,17 @@ class _MyHomePageState extends State<MyHomePage> {
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
     setState(() {
       locationMessage =
-      "Current position: ${position.latitude.toStringAsFixed(7)} , ${position.longitude.toStringAsFixed(7)}";
+      "Current position: ${position.latitude.toStringAsFixed(7)} , ${position.longitude.toStringAsFixed(7)} \n "
+          "Current Timestamp: ${position.timestamp.toLocal()}";
     });
   }
 
-  void connectToServer() {
-    client.connect();
-    client.on('connect', (_) => print('connect: ${client.id}'));
-    client.on('connect', (_) => print('connect: ${client2.id}'));
-  }
 
   void sendLocation() {
     if (locationMessage == "") {
       ScaffoldMessenger.of(context).showSnackBar(snackBar1);
     }
     else {
-      client.emit('msg', locationMessage);
-      client2.emit('msg', locationMessage);
 
       InternetAddress.lookup(host1).then((value) {
         value.forEach((element) async {
@@ -162,6 +150,15 @@ class _MyHomePageState extends State<MyHomePage> {
           RawDatagramSocket.bind(InternetAddress.anyIPv4, 0)
               .then((RawDatagramSocket socket) {
             socket.send(locationMessage.codeUnits, InternetAddress(ip2), 9000);
+          });
+        });
+      });
+      InternetAddress.lookup(host3).then((value) {
+        value.forEach((element) async {
+          var ip3 = (element.address);
+          RawDatagramSocket.bind(InternetAddress.anyIPv4, 0)
+              .then((RawDatagramSocket socket) {
+            socket.send(locationMessage.codeUnits, InternetAddress(ip3), 9000);
           });
         });
       });
