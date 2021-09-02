@@ -14,11 +14,10 @@ class _MyHomePageState extends State<MyHomePage> {
   var locationMessage = "";
   var infoPhone = "";
   var timeStamp = "";
+  var stop = 0;
   String host1 = "angelica.hopto.org";
   String host2 = "taxiflow.zapto.org";
   String host3 = "dierickb.hopto.org";
-  final snackBar = SnackBar(content: Text('Mensaje enviado'));
-  final snackBar1 = SnackBar(content: Text('Missing location'));
 
 
   @override
@@ -69,15 +68,6 @@ class _MyHomePageState extends State<MyHomePage> {
               "assets/location.gif",
               height: 250,
             ),
-            RaisedButton(
-                color: Colors.red,
-                textColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                child: Text("FIND ME", style: TextStyle(fontSize: 20)),
-                onPressed: () {
-                  getCurrentLocation();
-                }),
             Text(locationMessage),
             SizedBox(
               height: 20,
@@ -95,6 +85,16 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: Text("SEND", style: TextStyle(fontSize: 20)),
                         onPressed: () {
                           sendLocation();
+                          Text(infoPhone);
+                        }),
+                    RaisedButton(
+                        color: Colors.blue,
+                        textColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Text("STOP", style: TextStyle(fontSize: 20)),
+                        onPressed: () {
+                          stopSend();
                           Text(infoPhone);
                         }),
                   ],
@@ -117,22 +117,25 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void getCurrentLocation() async {
-    var position = await Geolocator()
-        .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    setState(() {
-      locationMessage =
-      "Current position: ${position.latitude.toStringAsFixed(7)} , ${position.longitude.toStringAsFixed(7)} \n "
-          "Current Timestamp: ${position.timestamp.toLocal()}";
-    });
+  void stopSend() {
+    stop = 1;
   }
 
 
-  void sendLocation() {
-    if (locationMessage == "") {
-      ScaffoldMessenger.of(context).showSnackBar(snackBar1);
-    }
-    else {
+  void sendLocation() async {
+    stop = 0;
+   var timer = Timer.periodic(Duration(seconds: 5), (timer) async {
+      if(stop == 1){
+        timer.cancel();
+      }
+
+      var position = await Geolocator()
+          .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      setState(() {
+        locationMessage =
+        "Current position: ${position.latitude.toStringAsFixed(7)} , ${position.longitude.toStringAsFixed(7)} \n "
+            "Current Timestamp: ${position.timestamp.toLocal()}";
+      });
 
       InternetAddress.lookup(host1).then((value) {
         value.forEach((element) async {
@@ -162,8 +165,7 @@ class _MyHomePageState extends State<MyHomePage> {
           });
         });
       });
+    });
 
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    }
   }
 }
