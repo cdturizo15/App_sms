@@ -12,7 +12,7 @@
       <!--android:icon="@mipmap/gps_icon"> -->
 
 <meta-data android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBQ8iM9WXHZFX64DEdopurzvhx8p6xakvc"/>
+            android:value="-"/>
       <activity
           android:name=".MainActivity"
           android:launchMode="singleTop"
