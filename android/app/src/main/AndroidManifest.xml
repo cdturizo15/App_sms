@@ -4,10 +4,15 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.SEND_SMS"/>
     <uses-permission android:name="android.permission.READ_SMS"/>
+<uses-permission android:name="android.permission.INTERNET"/>
   <application
 
-      android:label="Taxiflow"
-      android:icon="@mipmap/gps_icon">
+      android:label="TaxiFlow"
+      android:icon="@mipmap/taxi">
+      <!--android:icon="@mipmap/gps_icon"> -->
+
+<meta-data android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBQ8iM9WXHZFX64DEdopurzvhx8p6xakvc"/>
       <activity
           android:name=".MainActivity"
           android:launchMode="singleTop"
