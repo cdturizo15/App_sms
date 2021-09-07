@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:custom_switch/custom_switch.dart';
 import 'dart:io';
 import 'package:geolocator/geolocator.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:flutter_application_1/ui/pages/imgtobytes.dart';
 
 class MyHomePage extends StatefulWidget {
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
+
 
 class _MyHomePageState extends State<MyHomePage> {
   var locationMessage = "";
@@ -29,7 +29,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool isSwitched = false;
 
   final _initialCameraPosition =
-      CameraPosition(target: LatLng(11.0041072, -74.8069813), zoom: 15);
+      CameraPosition(target: LatLng(11.0041072, -74.8069813), zoom: 13);
 
   @override
   void initState() {
@@ -101,9 +101,13 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               SizedBox(
                   width: 400,
-                  height: 250,
-                  child:
-                      GoogleMap(initialCameraPosition: _initialCameraPosition))
+                  height: 200,
+                  child: GoogleMap(
+                    myLocationButtonEnabled: false,
+                    zoomControlsEnabled: false,
+                    initialCameraPosition: _initialCameraPosition
+                  )
+              )
             ],
           ),
         ),
