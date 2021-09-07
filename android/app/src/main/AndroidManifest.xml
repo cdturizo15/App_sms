@@ -11,8 +11,11 @@
       android:icon="@mipmap/taxi">
       <!--android:icon="@mipmap/gps_icon"> -->
 
+<<<<<<< HEAD
       <meta-data android:name="com.google.android.geo.API_KEY"
           android:value="IzaSyBQ8iM9WXHZFX64DEdopurzvhx8p6xakvc"/>
+=======
+>>>>>>> 39e25975ca93fbe28c5faa3592f92bf42e64c336
       <activity
           android:name=".MainActivity"
           android:launchMode="singleTop"
