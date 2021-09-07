@@ -1,16 +1,10 @@
 import 'dart:async';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/pages/user.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:geolocator/geolocator.dart';
-<<<<<<< HEAD
-import 'package:flutter_application_1/ui/pages/imgtobytes.dart';
-=======
 import 'package:custom_switch/custom_switch.dart';
 import 'package:permission_handler/permission_handler.dart';
->>>>>>> 39e25975ca93fbe28c5faa3592f92bf42e64c336
 
 class MyHomePage extends StatefulWidget {
   @override
@@ -26,19 +20,10 @@ class _MyHomePageState extends State<MyHomePage> {
   var latitude;
   var longitude;
   var timestamp;
-
   String host1 = "angelica.hopto.org";
   String host2 = "taxiflow.zapto.org";
   String host3 = "dierickb.hopto.org";
-
   bool isSwitched = false;
-
-<<<<<<< HEAD
-  final _initialCameraPosition =
-      CameraPosition(target: LatLng(11.0041072, -74.8069813), zoom: 13);
-
-=======
->>>>>>> 39e25975ca93fbe28c5faa3592f92bf42e64c336
   @override
   void initState() {
     super.initState();
@@ -107,18 +92,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                 ),
               ),
-<<<<<<< HEAD
-              SizedBox(
-                  width: 400,
-                  height: 200,
-                  child: GoogleMap(
-                    myLocationButtonEnabled: false,
-                    zoomControlsEnabled: false,
-                    initialCameraPosition: _initialCameraPosition
-                  )
-              )
-=======
->>>>>>> 39e25975ca93fbe28c5faa3592f92bf42e64c336
             ],
           ),
         ),
