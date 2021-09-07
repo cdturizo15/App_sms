@@ -1,12 +1,12 @@
 import 'dart:async';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter/material.dart';
-import 'package:custom_switch/custom_switch.dart';
 import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/pages/user.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:geolocator/geolocator.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'package:flutter_application_1/ui/pages/imgtobytes.dart';
+import 'package:custom_switch/custom_switch.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class MyHomePage extends StatefulWidget {
   @override
@@ -18,8 +18,8 @@ class _MyHomePageState extends State<MyHomePage> {
   var infoPhone = "";
   var timeStamp = "";
   var stop = false;
-  var latitude = "-";
-  var longitude = "-";
+  var latitude;
+  var longitude;
   var timestamp;
 
   String host1 = "angelica.hopto.org";
@@ -27,9 +27,6 @@ class _MyHomePageState extends State<MyHomePage> {
   String host3 = "dierickb.hopto.org";
 
   bool isSwitched = false;
-
-  final _initialCameraPosition =
-      CameraPosition(target: LatLng(11.0041072, -74.8069813), zoom: 15);
 
   @override
   void initState() {
@@ -57,12 +54,9 @@ class _MyHomePageState extends State<MyHomePage> {
         //Icon(Icons.home),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh),
+            icon: Icon(Icons.account_circle),
             onPressed: () {
-              Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (BuildContext context) => super.widget));
+              _showSecondPage(context);
             },
           )
         ],
@@ -72,21 +66,24 @@ class _MyHomePageState extends State<MyHomePage> {
           padding: const EdgeInsets.all(10.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text("WELCOME!",
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontStyle: FontStyle.normal,
-                      fontSize: 30,
+                      fontSize: 40,
                       color: Color(0xffed5c52))),
               Image.asset(
                 "assets/location.gif",
-                height: 200,
+                height: 350,
               ),
-              Text(locationMessage),
               Padding(
-                padding: const EdgeInsets.all(10.0),
+                padding: const EdgeInsets.all(8.0),
+                child: Text(locationMessage),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(13.0),
                 child: CustomSwitch(
                   value: isSwitched,
                   activeColor: Colors.blue,
@@ -99,16 +96,20 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                 ),
               ),
-              SizedBox(
-                  width: 400,
-                  height: 250,
-                  child:
-                      GoogleMap(initialCameraPosition: _initialCameraPosition))
             ],
           ),
         ),
       ),
       backgroundColor: Colors.white,
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.refresh),
+        onPressed: () {
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext context) => super.widget));
+        },
+      ),
     );
   }
 
@@ -118,52 +119,46 @@ class _MyHomePageState extends State<MyHomePage> {
       if (isSwitched == false) {
         timer.cancel();
         setState(() {
-          locationMessage = "Last position: $latitude , $longitude \n "
+          locationMessage = "Last position: $latitude , $longitude\n"
+              "\n"
               "Last Timestamp: $timestamp";
         });
       } else {
         var position = await Geolocator()
             .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
         setState(() {
-          latitude = position.latitude.toStringAsFixed(7);
-          longitude = position.longitude.toStringAsFixed(7);
+          latitude = double.parse(position.latitude.toStringAsFixed(7));
+          longitude = double.parse(position.longitude.toStringAsFixed(7));
           timestamp = position.timestamp.toLocal();
-          locationMessage = "Current position: $latitude , $longitude \n "
+          locationMessage = "Current position: $latitude , $longitude\n"
+              "\n"
               "Current Timestamp: $timestamp";
         });
 
-        InternetAddress.lookup(host1).then((value) {
-          value.forEach((element) async {
-            var ip1 = (element.address);
-            RawDatagramSocket.bind(InternetAddress.anyIPv4, 0)
-                .then((RawDatagramSocket socket) {
-              socket.send(
-                  locationMessage.codeUnits, InternetAddress(ip1), 9000);
-            });
-          });
-        });
-
-        InternetAddress.lookup(host2).then((value) {
-          value.forEach((element) async {
-            var ip2 = (element.address);
-            RawDatagramSocket.bind(InternetAddress.anyIPv4, 0)
-                .then((RawDatagramSocket socket) {
-              socket.send(
-                  locationMessage.codeUnits, InternetAddress(ip2), 9000);
-            });
-          });
-        });
-        InternetAddress.lookup(host3).then((value) {
-          value.forEach((element) async {
-            var ip3 = (element.address);
-            RawDatagramSocket.bind(InternetAddress.anyIPv4, 0)
-                .then((RawDatagramSocket socket) {
-              socket.send(
-                  locationMessage.codeUnits, InternetAddress(ip3), 9000);
-            });
-          });
-        });
+        udpSocket(host1);
+        udpSocket(host2);
+        udpSocket(host3);
       }
     });
+  }
+
+  void udpSocket(host) async {
+    InternetAddress.lookup(host).then((value) {
+      value.forEach((element) async {
+        var ip1 = (element.address);
+        RawDatagramSocket.bind(InternetAddress.anyIPv4, 0)
+            .then((RawDatagramSocket socket) {
+          socket.send(locationMessage.codeUnits, InternetAddress(ip1), 9000);
+          print(locationMessage);
+        });
+      });
+    });
+  }
+
+  void _showSecondPage(BuildContext context) {
+    final route = MaterialPageRoute(builder: (BuildContext context) {
+      return UserPage();
+    });
+    Navigator.of(context).push(route);
   }
 }
