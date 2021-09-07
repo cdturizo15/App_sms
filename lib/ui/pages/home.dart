@@ -14,6 +14,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var locationMessage = "";
+  var Message = '';
   var infoPhone = "";
   var timeStamp = "";
   var stop = false;
@@ -116,19 +117,18 @@ class _MyHomePageState extends State<MyHomePage> {
         timer.cancel();
         setState(() {
           locationMessage = "Last position: $latitude , $longitude\n"
-              "\n"
               "Last Timestamp: $timestamp";
         });
       } else {
         var position = await Geolocator()
             .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
         setState(() {
-          latitude = double.parse(position.latitude.toStringAsFixed(7));
-          longitude = double.parse(position.longitude.toStringAsFixed(7));
+          latitude = position.latitude.toStringAsFixed(7);
+          longitude = position.longitude.toStringAsFixed(7);
           timestamp = position.timestamp.toLocal();
           locationMessage = "Current position: $latitude , $longitude\n"
-              "\n"
               "Current Timestamp: $timestamp";
+          Message = locationMessage;
         });
 
         udpSocket(host1);
@@ -144,8 +144,8 @@ class _MyHomePageState extends State<MyHomePage> {
         var ip1 = (element.address);
         RawDatagramSocket.bind(InternetAddress.anyIPv4, 0)
             .then((RawDatagramSocket socket) {
-          socket.send(locationMessage.codeUnits, InternetAddress(ip1), 9000);
-          print(locationMessage);
+          socket.send(Message.codeUnits, InternetAddress(ip1), 9000);
+          print(Message);
         });
       });
     });
