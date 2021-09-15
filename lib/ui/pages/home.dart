@@ -22,9 +22,12 @@ class _MyHomePageState extends State<MyHomePage> {
   var timestamp;
 
   String licensePlate = "AAA-000";
-  String host1 = "angelica.hopto.org";
-  String host2 = "taxiflow.zapto.org";
-  String host3 = "dierickb.hopto.org";
+  String host1 = "taxiflow.ddns.net";
+  String host2 = "taxiflow.bounceme.net";
+  String host3 = "diericktaxiflow.hopto.org";
+  String host4 = "dojuan.hopto.org";
+  String host5 = "diericktaxiflow.hopto.org";
+
   bool isSwitched = false;
   @override
   void initState() {
@@ -128,13 +131,15 @@ class _MyHomePageState extends State<MyHomePage> {
           longitude = position.longitude.toStringAsFixed(7);
           timestamp = position.timestamp.toLocal();
           locationMessage = "Current position: $latitude , $longitude\n"
-              "Current Timestamp: $timestamp - License Plate: $licensePlate";
-          Message = locationMessage;
+              "Current Timestamp: $timestamp";
+          Message = "$locationMessage - License Plate: $licensePlate";
         });
 
         udpSocket(host1);
         udpSocket(host2);
         udpSocket(host3);
+        udpSocket(host4);
+        udpSocket(host5);
       }
     });
   }
@@ -159,3 +164,4 @@ class _MyHomePageState extends State<MyHomePage> {
     Navigator.of(context).push(route);
   }
 }
+
