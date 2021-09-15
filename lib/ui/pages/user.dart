@@ -14,6 +14,7 @@ class UserPage extends StatefulWidget {
 }
 
 class _UserPage extends State<UserPage> {
+  final _formKey = GlobalKey<FormState>();
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -51,9 +52,49 @@ class _UserPage extends State<UserPage> {
                           "https://www.movilidadbogota.gov.co/web/sites/default/files/Noticias/26-08-2020/jose_castaneda.jpg")))),
           Text("Juan Pablo Diaz", textScaleFactor: 2.0),
           Text("ID: 123456789", textScaleFactor: 1.5),
-          Text("PLACA: WMQ-397", textScaleFactor: 1.5),
+          Text("PLACA: AAA-000", textScaleFactor: 1.5),
+          Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding:
+                      EdgeInsets.symmetric(vertical: 0.0, horizontal: 60.0),
+                  child: TextFormField(
+                    // The validator receives the text that the user has entered.
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter some text';
+                      }
+                      var licensePlate = value;
+                      print(licensePlate);
+                      return null;
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 5.0, horizontal: 160.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Validate returns true if the form is valid, or false otherwise.
+                      if (_formKey.currentState!.validate()) {
+                        // If the form is valid, display a snackbar || call a server or save the information in a database.
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Processing Data')),
+                        );
+                      }
+                    },
+                    child: const Text('Submit'),
+                  ),
+                ),
+              ],
+            ),
+          ),
           Padding(
-            padding: const EdgeInsets.all(15.0),
+            padding: const EdgeInsets.all(10.0),
             child: Image.network(
                 "https://http2.mlstatic.com/D_NQ_NP_764427-MCO43645490226_102020-O.jpg"),
           ),
