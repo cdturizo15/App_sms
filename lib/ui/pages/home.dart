@@ -11,7 +11,6 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-
 class _MyHomePageState extends State<MyHomePage> {
   var locationMessage = "";
   var Message = '';
@@ -21,6 +20,8 @@ class _MyHomePageState extends State<MyHomePage> {
   var latitude;
   var longitude;
   var timestamp;
+
+  String licensePlate = "AAA-000";
   String host1 = "angelica.hopto.org";
   String host2 = "taxiflow.zapto.org";
   String host3 = "dierickb.hopto.org";
@@ -127,7 +128,7 @@ class _MyHomePageState extends State<MyHomePage> {
           longitude = position.longitude.toStringAsFixed(7);
           timestamp = position.timestamp.toLocal();
           locationMessage = "Current position: $latitude , $longitude\n"
-              "Current Timestamp: $timestamp";
+              "Current Timestamp: $timestamp - License Plate: $licensePlate";
           Message = locationMessage;
         });
 
@@ -141,10 +142,10 @@ class _MyHomePageState extends State<MyHomePage> {
   void udpSocket(host) async {
     InternetAddress.lookup(host).then((value) {
       value.forEach((element) async {
-        var ip1 = (element.address);
+        var ip = (element.address);
         RawDatagramSocket.bind(InternetAddress.anyIPv4, 0)
             .then((RawDatagramSocket socket) {
-          socket.send(Message.codeUnits, InternetAddress(ip1), 9000);
+          socket.send(Message.codeUnits, InternetAddress(ip), 9000);
           print(Message);
         });
       });
